@@ -1,0 +1,871 @@
+<title>Outcome Invaders</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap">
+<style>
+  :root {
+    color-scheme: dark;
+    --void: #0a0820;
+    --screen: #050414;
+    --panel: #0d0a2a;
+    --rim: #2a2470;
+    --phos: #7df9ff;
+    --hot: #ff4fa3;
+    --amber: #ffcf4a;
+    --ink: #ecebff;
+    --dim: #8f8bd0;
+    --good: #5bffb0;
+    --bad: #ff5a4f;
+    --pixel: "Press Start 2P", "Courier New", monospace;
+    --crt: "VT323", ui-monospace, Consolas, monospace;
+  }
+  html, body { height: 100%; }
+  body {
+    background: var(--void);
+    color: var(--ink);
+    font-family: var(--crt);
+    font-size: 22px;
+    line-height: 1.25;
+    box-sizing: border-box;
+    padding-inline: 16px;
+    padding-block: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+  .cab {
+    position: relative;
+    width: 100%;
+    max-width: 960px;
+    aspect-ratio: 3 / 2;
+    container-type: inline-size;
+    background: var(--screen);
+    border: 3px solid var(--rim);
+    box-shadow: 0 0 0 6px #120e33, 0 0 48px rgba(125, 249, 255, .10);
+    overflow: hidden;
+  }
+  .cab::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(to bottom, rgba(255,255,255,.035) 0 1px, transparent 1px 3px);
+  }
+  canvas { display: block; width: 100%; height: 100%; }
+
+  /* Overlays */
+  .ov {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: safe center;
+    gap: 2.2cqw;
+    padding: 4cqw 7cqw;
+    text-align: center;
+    background: rgba(5, 4, 20, .88);
+    overflow-y: auto;
+  }
+  .eyebrow {
+    margin: 0;
+    font-family: var(--pixel);
+    font-size: 1.25cqw;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+  .logo {
+    margin: 0;
+    font-family: var(--pixel);
+    font-weight: 400;
+    font-size: 6.2cqw;
+    line-height: 1.15;
+    color: var(--amber);
+    text-shadow: .5cqw .5cqw 0 var(--hot);
+    display: flex;
+    flex-direction: column;
+    gap: 1cqw;
+  }
+  .logo span:last-child { color: var(--phos); text-shadow: .5cqw .5cqw 0 #3a2a9a; }
+  h2 {
+    margin: 0;
+    font-family: var(--pixel);
+    font-weight: 400;
+    font-size: 3.6cqw;
+    line-height: 1.3;
+    color: var(--amber);
+    text-wrap: balance;
+  }
+  .ov p { margin: 0; max-width: 62ch; }
+  .lead { font-size: 2.7cqw; color: var(--ink); text-wrap: balance; }
+  .lead em, .order em { font-style: normal; color: var(--good); }
+
+  .legend { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5cqw; width: 100%; max-width: 70cqw; }
+  .key {
+    display: flex; flex-direction: column; gap: .6cqw;
+    padding: 1.6cqw 2cqw;
+    background: var(--panel);
+    border: .35cqw solid currentColor;
+    text-align: left;
+    font-size: 2.4cqw;
+  }
+  .key p { color: var(--ink); }
+  .key .eg { color: var(--dim); }
+  .key-out { color: var(--bad); }
+  .key-in { color: var(--good); }
+  .tag { font-family: var(--pixel); font-size: 1.4cqw; letter-spacing: .1em; }
+
+  .order {
+    font-family: var(--pixel);
+    font-size: 1.9cqw;
+    color: var(--ink);
+    letter-spacing: .06em;
+  }
+  .wave-no { font-family: var(--pixel); font-size: 1.5cqw; color: var(--phos); letter-spacing: .12em; }
+  .stamp {
+    font-family: var(--pixel);
+    font-size: 1.4cqw;
+    color: var(--screen);
+    background: var(--good);
+    padding: .8cqw 1.4cqw;
+    letter-spacing: .08em;
+  }
+
+  .cta {
+    font-family: var(--pixel);
+    font-size: 1.7cqw;
+    letter-spacing: .08em;
+    color: var(--screen);
+    background: var(--amber);
+    border: 0;
+    padding: 1.4cqw 2.4cqw;
+    cursor: pointer;
+    box-shadow: .45cqw .45cqw 0 var(--hot);
+    animation: blink 1.1s steps(2, jump-none) infinite;
+  }
+  .cta:hover { background: var(--phos); }
+  .cta:focus-visible { outline: 3px solid var(--phos); outline-offset: 4px; }
+  @keyframes blink { 50% { opacity: .55; } }
+
+  .controls-mini { font-size: 2.1cqw; color: var(--dim); }
+  kbd {
+    font-family: var(--pixel);
+    font-size: .62em;
+    color: var(--ink);
+    background: #1b1650;
+    border: 2px solid var(--rim);
+    padding: .15em .45em;
+    vertical-align: .15em;
+  }
+
+  /* End screen */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5cqw; margin: 0; width: 100%; max-width: 72cqw; }
+  .stats div { background: var(--panel); border: 2px solid var(--rim); padding: 1.2cqw 1cqw; display: flex; flex-direction: column; gap: .6cqw; }
+  .stats dt { font-family: var(--pixel); font-size: 1cqw; letter-spacing: .1em; color: var(--dim); text-transform: uppercase; }
+  .stats dd { margin: 0; font-family: var(--pixel); font-size: 2cqw; color: var(--amber); font-variant-numeric: tabular-nums; }
+  .review { width: 100%; max-width: 72cqw; text-align: left; display: flex; flex-direction: column; gap: 1cqw; }
+  .review h3 { margin: 0; font-family: var(--pixel); font-weight: 400; font-size: 1.3cqw; letter-spacing: .1em; color: var(--bad); }
+  .review ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1cqw; max-height: 19cqw; overflow-y: auto; }
+  .review li { background: var(--panel); border: 2px solid #3a1630; padding: 1cqw 1.4cqw; font-size: 2.2cqw; }
+  .review li b { color: var(--ink); font-weight: 400; }
+  .review li span { color: var(--dim); }
+  .review li.clean { border-color: #16433a; color: var(--good); }
+  .takeaway { font-size: 2.5cqw; color: var(--phos); }
+
+  /* Tip toast shown during play */
+  .tip {
+    position: absolute;
+    z-index: 1;
+    left: 50%;
+    top: 61%;
+    transform: translateX(-50%);
+    width: 74%;
+    padding: 1.1cqw 1.6cqw;
+    background: rgba(26, 6, 22, .93);
+    border: .35cqw solid var(--bad);
+    font-size: 2.3cqw;
+    line-height: 1.2;
+    color: var(--ink);
+    pointer-events: none;
+  }
+  .tip .tag { color: var(--bad); margin-right: .6em; }
+  .tip q { color: var(--amber); }
+
+  .below {
+    width: 100%;
+    max-width: 960px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 8px 24px;
+    font-size: 20px;
+    color: var(--dim);
+  }
+  .below a { color: var(--phos); }
+  .below a:focus-visible { outline: 2px solid var(--phos); outline-offset: 2px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cta { animation: none; }
+  }
+</style>
+
+<div class="cab" id="cab">
+  <canvas id="cv" aria-label="Outcome Invaders game screen"></canvas>
+  <div id="tip" class="tip" hidden></div>
+
+  <section id="ov-title" class="ov">
+    <p class="eyebrow">Product thinking · Chase outcomes</p>
+    <h1 class="logo"><span>OUTCOME</span><span>INVADERS</span></h1>
+    <div class="legend">
+      <div class="key key-out">
+        <span class="tag">OUTPUT</span>
+        <p>What a team makes or does.</p>
+        <p class="eg">An app. A website. 50 new features.</p>
+      </div>
+      <div class="key key-in">
+        <span class="tag">OUTCOME</span>
+        <p>The change it causes for people.</p>
+        <p class="eg">Shorter queues. More people reading.</p>
+      </div>
+    </div>
+    <p class="lead">Every invader carries a label. Shoot only the <em>outcomes</em>. Hit an output and you lose a life.</p>
+    <p class="controls-mini"><kbd>←</kbd> <kbd>→</kbd> move &nbsp; <kbd>SPACE</kbd> fire &nbsp; <kbd>P</kbd> pause &nbsp; <kbd>M</kbd> sound</p>
+    <button id="btn-start" class="cta" type="button">PRESS SPACE TO START</button>
+  </section>
+
+  <section id="ov-brief" class="ov" hidden>
+    <p class="stamp" id="b-result" hidden></p>
+    <p class="wave-no" id="b-no">WAVE 1 / 5</p>
+    <h2 id="b-name">LIBRARY APP</h2>
+    <p class="lead" id="b-ctx"></p>
+    <p class="order">SHOOT THE <em>OUTCOMES</em></p>
+    <button id="btn-go" class="cta" type="button">PRESS SPACE TO LAUNCH</button>
+  </section>
+
+  <section id="ov-pause" class="ov" hidden>
+    <h2>PAUSED</h2>
+    <p class="lead">Output: what we make. Outcome: what changes for people.</p>
+    <button id="btn-resume" class="cta" type="button">PRESS SPACE TO RESUME</button>
+  </section>
+
+  <section id="ov-end" class="ov" hidden>
+    <p class="eyebrow" id="e-status">Mission complete</p>
+    <h2 id="e-rank">PRODUCT THINKER</h2>
+    <p class="lead" id="e-rank-desc"></p>
+    <dl class="stats">
+      <div><dt>Score</dt><dd id="e-score">0</dd></div>
+      <div><dt>Outcomes hit</dt><dd id="e-correct">0</dd></div>
+      <div><dt>Outputs hit</dt><dd id="e-wrong">0</dd></div>
+      <div><dt>Waves cleared</dt><dd id="e-waves">0/5</dd></div>
+    </dl>
+    <div class="review">
+      <h3>OUTPUTS YOU HIT</h3>
+      <ul id="e-misses"></ul>
+    </div>
+    <p class="takeaway">Next time someone reports a win, ask: what changed for people?</p>
+    <button id="btn-again" class="cta" type="button">PLAY AGAIN</button>
+  </section>
+</div>
+
+<div class="below">
+  <span><kbd>←</kbd> <kbd>→</kbd> or <kbd>A</kbd> <kbd>D</kbd> move · <kbd>SPACE</kbd> fire · <kbd>P</kbd> pause · <kbd>M</kbd> sound on/off</span>
+  <span>Based on the <a href="https://www.idg.gov.sg/product-thinking/" target="_blank" rel="noopener">IDG Product Thinking pathway</a></span>
+</div>
+
+<script>
+(() => {
+  // ---------- Content ----------
+  // [label, isOutput, tip shown when an output is shot]
+  const WAVES = [
+    {
+      name: 'LIBRARY APP',
+      ctx: 'Your town library launches an app for borrowing e-books and reserving titles. Which results show readers are better off?',
+      speed: 56, fire: 1.4, pts: 100,
+      items: [
+        ['More residents read every month', false],
+        ['Shorter wait for popular books', false],
+        ['Seniors borrow e-books on their own', false],
+        ['Fewer trips just to renew loans', false],
+        ['Kids read more over school holidays', false],
+        ['App launched on schedule', true, 'Launching the app is something the team made. It says nothing about whether anyone reads more.'],
+        ['50 new features shipped', true, 'Features are outputs. More features do not mean readers are better off.'],
+        ['E-book catalogue added', true, 'Adding a catalogue is an output. The outcome is whether people actually borrow and read.'],
+        ['Posters put up in all branches', true, 'Putting up posters is an activity. Ask what changes for readers after they see them.'],
+      ],
+    },
+    {
+      name: 'BUS SERVICE',
+      ctx: 'A bus arrival app goes live, and the town adds more buses on busy routes. Which results show commuters are better off?',
+      speed: 62, fire: 1.25, pts: 100,
+      items: [
+        ['Commuters wait less at stops', false],
+        ['Fewer people miss their bus', false],
+        ['More people take the bus, not a car', false],
+        ['Buses less packed at peak hour', false],
+        ['Wheelchair users travel with less hassle', false],
+        ['Arrival app released', true, 'Releasing an app is an output. The outcome is shorter, less stressful waits.'],
+        ['20 new buses bought', true, 'Buying buses is spending. It only matters if trips get better for commuters.'],
+        ['LED screens at 300 stops', true, 'Installing screens is an output. Check whether commuters actually wait less.'],
+        ['New route map printed', true, 'A printed map is an output. The outcome is people finding their way more easily.'],
+      ],
+    },
+    {
+      name: 'HAWKER CENTRE',
+      ctx: 'The hawker centre rolls out cashless payment and tray-return stations. Which results show diners and stallholders are better off?',
+      speed: 70, fire: 1.1, pts: 100,
+      items: [
+        ['Tables free up faster at lunch', false],
+        ['Stallholders spend less time on cash', false],
+        ['Diners queue less at peak hours', false],
+        ['Cleaner tables for the next diner', false],
+        ['More regulars come back each week', false],
+        ['QR codes at every stall', true, 'Putting up QR codes is an output. The outcome is faster, easier payment.'],
+        ['Tray-return stations built', true, 'Building stations is an output. The outcome is cleaner tables that free up faster.'],
+        ['Payment workshop held', true, 'Holding a workshop is an activity. Did stallholders actually start using cashless payment?'],
+        ['Campaign video made', true, 'A video is an output. What matters is whether diners change what they do.'],
+      ],
+    },
+    {
+      name: 'POLYCLINIC BOOKING',
+      ctx: 'The polyclinic moves appointment booking online. Which results show patients are better off?',
+      speed: 78, fire: 1.0, pts: 100,
+      items: [
+        ['Patients wait less on the day', false],
+        ['Fewer missed appointments', false],
+        ['Nurses spend more time with patients', false],
+        ['Elderly book without calling in', false],
+        ['Less crowding in the waiting area', false],
+        ['Booking website went live', true, 'A website going live is an output. Patients could still wait just as long.'],
+        ['SMS reminder system built', true, 'Building a reminder system is an output. The outcome is fewer missed appointments.'],
+        ['Staff trained on new system', true, 'Training staff is an activity. It helps only if patients have a better visit.'],
+        ['10,000 accounts created', true, 'Sign-ups count use of the thing you built, not the change it makes. People can sign up and still wait just as long.'],
+      ],
+    },
+    {
+      name: 'SHINY NUMBERS',
+      ctx: 'Final wave. Reports from across public services, and some outputs are dressed up as results with big numbers and records. They move faster now.',
+      speed: 88, fire: .9, pts: 150,
+      items: [
+        ['Residents sorted out in one visit', false],
+        ['Seniors renew passes without help', false],
+        ['Families spend less time on forms', false],
+        ['Fewer people give up halfway online', false],
+        ['Hawkers get paid a day sooner', false],
+        ['Parents find a preschool faster', false],
+        ['1 million app downloads', true, 'Downloads sound like success, but they measure the product, not what changed. Many downloaded apps are never opened again.'],
+        ['100% of forms now digital', true, 'Digitising forms is an output. Families may still lose hours if the forms are confusing.'],
+        ['Record 5,000 site visits a day', true, 'Visits count traffic, not results. People may visit often because they cannot find what they need.'],
+        ['Chatbot answers 24/7', true, 'A chatbot being available is an output. The outcome is people getting their problem solved.'],
+        ['Project done under budget', true, 'Finishing under budget is good delivery, but it is still about the output. Did anyone’s life get easier?'],
+        ['Survey sent to all users', true, 'Sending a survey is an activity. What it finds could show an outcome, but sending it is not one.'],
+      ],
+    },
+  ];
+
+  // ---------- Setup ----------
+  const W = 960, H = 640, IW = 200, IH = 48, GX = 24;
+  const GROUND = 612, BUNKER_Y = 498, PLAYER_Y = 578;
+  const ROW_COLORS = ['#ff4fa3', '#b48cff', '#ff9a3d', '#ffcf4a'];
+  const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const LABEL_FONT = '21px VT323, Consolas, monospace';
+  const PIX = (s) => `${s}px "Press Start 2P", "Courier New", monospace`;
+
+  const cab = document.getElementById('cab');
+  const cv = document.getElementById('cv');
+  const ctx = cv.getContext('2d');
+  const tipEl = document.getElementById('tip');
+  const $ = (id) => document.getElementById(id);
+
+  function resize() {
+    const dpr = window.devicePixelRatio || 1;
+    const s = cab.clientWidth / W;
+    cv.width = Math.round(W * s * dpr);
+    cv.height = Math.round(H * s * dpr);
+    ctx.setTransform(s * dpr, 0, 0, s * dpr, 0, 0);
+    ctx.imageSmoothingEnabled = false;
+  }
+  new ResizeObserver(resize).observe(cab);
+  resize();
+
+  // ---------- Sound ----------
+  let AC = null, muted = false;
+  function sfx(f1, f2, dur, type = 'square', vol = .05) {
+    if (muted) return;
+    try {
+      AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+      const t = AC.currentTime, o = AC.createOscillator(), g = AC.createGain();
+      o.type = type;
+      o.frequency.setValueAtTime(f1, t);
+      o.frequency.exponentialRampToValueAtTime(Math.max(30, f2), t + dur);
+      g.gain.setValueAtTime(vol, t);
+      g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+      o.connect(g).connect(AC.destination);
+      o.start(t); o.stop(t + dur);
+    } catch (e) {}
+  }
+
+  // ---------- State ----------
+  const G = { state: 'title', wave: 0, score: 0, lives: 3, correct: 0, wrong: 0, cleared: 0, misses: [] };
+  let invaders = [], form = null, bunkers = [], player, pBullet = null, eBullets = [];
+  let rowQueue = [], rowNum = 0, spawnT = 0, spared = 0, fleeing = [];
+  let particles = [], floaters = [], fireT = 0, animT = 0, shakeT = 0, clearT = 0, endGuard = 0, waveWrong = 0, tipT = 0;
+  const keys = {};
+  const stars = Array.from({ length: 90 }, () => ({ x: Math.random() * W, y: Math.random() * H, s: Math.random() < .2 ? 3 : 2, sp: 6 + Math.random() * 18, a: .25 + Math.random() * .6 }));
+
+  function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+  function wrap(t, max) {
+    ctx.font = LABEL_FONT;
+    const lines = []; let cur = '';
+    for (const w of t.split(' ')) {
+      const test = cur ? cur + ' ' + w : w;
+      if (ctx.measureText(test).width > max && cur) { lines.push(cur); cur = w; } else cur = test;
+    }
+    if (cur) lines.push(cur);
+    return lines.slice(0, 2);
+  }
+
+  function makeBunkers() {
+    bunkers = [150, 370, 590, 810].map(cx => {
+      const cells = [];
+      for (let r = 0; r < 7; r++) for (let c = 0; c < 12; c++) {
+        const cut = (r === 0 && (c < 2 || c > 9)) || (r === 1 && (c === 0 || c === 11)) ||
+                    (r >= 5 && c >= 4 && c <= 7) || (r === 4 && (c === 5 || c === 6));
+        if (!cut) cells.push({ x: cx - 36 + c * 6, y: BUNKER_Y + r * 6, alive: true });
+      }
+      return cells;
+    });
+  }
+
+  function hitBunker(b) {
+    for (const bk of bunkers) for (const c of bk) {
+      if (c.alive && b.x + b.w > c.x && b.x < c.x + 6 && b.y + b.h > c.y && b.y < c.y + 6) {
+        c.alive = false;
+        for (const d of bk) if (d.alive && Math.abs(d.x - c.x) <= 6 && Math.abs(d.y - c.y) <= 6 && Math.random() < .45) d.alive = false;
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // Each wave arrives as single rows of 3, one row at a time, so no label hides behind another.
+  // Outcomes are dealt round-robin first so every row has at least one to shoot.
+  function buildWave(i) {
+    const wv = WAVES[i];
+    const ins = shuffle(wv.items.filter(it => !it[1]));
+    const outs = shuffle(wv.items.filter(it => it[1]));
+    const nRows = Math.ceil(wv.items.length / 3);
+    const rows = Array.from({ length: nRows }, () => []);
+    ins.forEach((it, k) => rows[k % nRows].push(it));
+    for (const it of outs) rows.reduce((a, b) => (b.length < a.length ? b : a)).push(it);
+    rowQueue = shuffle(rows).map(r => shuffle(r));
+    rowNum = 0; spawnT = 0; spared = 0;
+    player = { x: W / 2 - 22, w: 44, h: 22, inv: 0 };
+    pBullet = null; eBullets = []; particles = []; floaters = []; fleeing = [];
+    fireT = 1.2; waveWrong = 0;
+    makeBunkers();
+    spawnRow();
+  }
+
+  function spawnRow() {
+    const items = rowQueue[rowNum];
+    invaders = items.map((it, k) => ({
+      text: it[0], out: it[1], tip: it[2] || '',
+      col: k, alive: true, lines: wrap(it[0], IW - 18),
+    }));
+    const cols = items.length;
+    form = { ox: (W - (cols * IW + (cols - 1) * GX)) / 2, oy: 70, dir: rowNum % 2 ? -1 : 1, total: items.length };
+    fireT = Math.max(fireT, .8);
+  }
+
+  const ix = (v) => form.ox + v.col * (IW + GX);
+  const iy = () => form.oy;
+  const outcomesLeft = () => {
+    if (!form) return 0;
+    let n = invaders.filter(v => v.alive && !v.out).length;
+    for (let r = rowNum + 1; r < rowQueue.length; r++) n += rowQueue[r].filter(it => !it[1]).length;
+    return n;
+  };
+
+  // ---------- Screens ----------
+  const OVS = ['ov-title', 'ov-brief', 'ov-pause', 'ov-end'];
+  function show(id) { OVS.forEach(o => { $(o).hidden = o !== id; }); const b = id && $(id).querySelector('button'); if (b) b.focus({ preventScroll: true }); }
+
+  function newGame() {
+    Object.assign(G, { score: 0, lives: 3, correct: 0, wrong: 0, cleared: 0, misses: [] });
+    toBrief(0, null);
+  }
+
+  function toBrief(i, result) {
+    G.state = 'brief'; G.wave = i;
+    const wv = WAVES[i];
+    $('b-result').hidden = !result;
+    if (result) $('b-result').textContent = result;
+    $('b-no').textContent = i === WAVES.length - 1 ? `FINAL WAVE · ${i + 1} / ${WAVES.length}` : `WAVE ${i + 1} / ${WAVES.length}`;
+    $('b-name').textContent = wv.name;
+    $('b-ctx').textContent = wv.ctx;
+    hideTip();
+    show('ov-brief');
+  }
+
+  function launch() {
+    if (G.state !== 'brief') return;
+    buildWave(G.wave);
+    G.state = 'play';
+    show(null);
+    sfx(220, 880, .25, 'square', .04);
+  }
+
+  function pause(on) {
+    if (on && G.state === 'play') { G.state = 'paused'; show('ov-pause'); }
+    else if (!on && G.state === 'paused') { G.state = 'play'; show(null); }
+  }
+
+  function rank(won) {
+    const tot = G.correct + G.wrong, acc = tot ? G.correct / tot : 0;
+    if (won && G.wrong === 0) return ['PRODUCT THINKER', 'You shot only outcomes. You ask what changed for people, not what got built.'];
+    if (tot === 0) return ['CADET', 'No labels hit yet. Launch again and hunt for the changes people would notice.'];
+    if (acc >= .8) return ['OUTCOME CHASER', 'Mostly outcomes. A few outputs dressed up as results got past you.'];
+    if (acc >= .5) return ['FEATURE SHIPPER', 'Many of your shots went to things that got made. Look for who ends up better off.'];
+    return ['OUTPUT FACTORY', 'Lots of launches, not much change. Play again and ask what is different for people.'];
+  }
+
+  function endGame(won, reason) {
+    G.state = 'end'; endGuard = 1;
+    hideTip();
+    const [title, desc] = rank(won);
+    $('e-status').textContent = won ? 'Mission complete' : reason;
+    $('e-rank').textContent = title;
+    $('e-rank-desc').textContent = desc;
+    $('e-score').textContent = String(G.score);
+    $('e-correct').textContent = String(G.correct);
+    $('e-wrong').textContent = String(G.wrong);
+    $('e-waves').textContent = `${G.cleared}/${WAVES.length}`;
+    const ul = $('e-misses'); ul.textContent = '';
+    if (!G.misses.length) {
+      const li = document.createElement('li'); li.className = 'clean';
+      li.textContent = 'None. You left every output alone.';
+      ul.append(li);
+    } else for (const m of G.misses) {
+      const li = document.createElement('li');
+      const b = document.createElement('b'); b.textContent = `“${m.text}” `;
+      const s = document.createElement('span'); s.textContent = m.tip;
+      li.append(b, s); ul.append(li);
+    }
+    show('ov-end');
+    sfx(won ? 330 : 300, won ? 990 : 80, won ? .6 : .8, won ? 'square' : 'sawtooth', .05);
+  }
+
+  function showTip(v) {
+    tipEl.textContent = '';
+    const tag = document.createElement('span'); tag.className = 'tag'; tag.textContent = 'OUTPUT';
+    const q = document.createElement('q'); q.textContent = v.text;
+    tipEl.append(tag, q, document.createTextNode(' ' + v.tip));
+    tipEl.hidden = false; tipT = 4.5;
+  }
+  function hideTip() { tipEl.hidden = true; tipT = 0; }
+
+  // ---------- Actions ----------
+  function fire() {
+    if (pBullet || G.state !== 'play') return;
+    pBullet = { x: player.x + player.w / 2 - 2, y: PLAYER_Y - 10, w: 4, h: 12 };
+    sfx(880, 220, .09, 'square', .03);
+  }
+
+  function explode(x, y, color, n = 18) {
+    for (let i = 0; i < n; i++) {
+      const a = Math.random() * Math.PI * 2, sp = 60 + Math.random() * 220;
+      particles.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: .5 + Math.random() * .5, color });
+    }
+  }
+
+  function loseLife() {
+    G.lives--; player.inv = 1.6;
+    if (!RM) shakeT = .3;
+    explode(player.x + player.w / 2, PLAYER_Y + 10, '#7df9ff', 24);
+    sfx(200, 50, .4, 'sawtooth', .06);
+    if (G.lives <= 0) endGame(false, 'Out of lives');
+  }
+
+  function hitInvader(v) {
+    v.alive = false;
+    const x = ix(v) + IW / 2, y = iy(v) + IH / 2;
+    if (v.out) {
+      G.wrong++; waveWrong++;
+      G.misses.push({ text: v.text, tip: v.tip });
+      explode(x, y, '#ff5a4f', 26);
+      floaters.push({ x, y, text: 'OUTPUT!', color: '#ff5a4f', t: 1.1 });
+      showTip(v);
+      loseLife();
+    } else {
+      G.correct++;
+      const pts = WAVES[G.wave].pts;
+      G.score += pts;
+      explode(x, y, '#5bffb0', 22);
+      floaters.push({ x, y, text: `+${pts} OUTCOME`, color: '#5bffb0', t: 1 });
+      sfx(520, 1040, .15, 'square', .04);
+      if (G.state === 'play' && !invaders.some(u => u.alive && !u.out)) rowClear();
+    }
+  }
+
+  function rowClear() {
+    for (const v of invaders) if (v.alive) { fleeing.push({ v, x: ix(v), y: iy(v), t: 0 }); spared++; }
+    invaders = [];
+    pBullet = null;
+    rowNum++;
+    if (rowNum >= rowQueue.length) { waveClear(); return; }
+    spawnT = 1;
+    floaters.push({ x: W / 2, y: 200, text: 'ROW CLEAR', color: '#7df9ff', t: 1 });
+  }
+
+  function waveClear() {
+    const perfect = waveWrong === 0 ? 300 : 0;
+    const bonus = spared * 50 + perfect;
+    G.score += bonus; G.cleared++;
+    G.state = 'clear'; clearT = 2;
+    G.clearMsg = `WAVE ${G.wave + 1} CLEAR · +${bonus} BONUS` + (perfect ? ' · NO OUTPUTS HIT' : '');
+    pBullet = null; eBullets = [];
+    sfx(440, 1320, .5, 'square', .05);
+  }
+
+  // ---------- Input ----------
+  addEventListener('keydown', (e) => {
+    const k = e.key, lk = k.toLowerCase();
+    if ([' ', 'arrowleft', 'arrowright', 'arrowup', 'arrowdown', 'enter'].includes(lk)) e.preventDefault();
+    keys[lk] = true;
+    if (lk === 'm') { muted = !muted; return; }
+    if (e.repeat) return;
+    if (G.state === 'play') {
+      if (k === ' ' || lk === 'arrowup' || lk === 'w') fire();
+      else if (lk === 'p' || lk === 'escape') pause(true);
+    } else if (G.state === 'paused') {
+      if ([' ', 'enter', 'p', 'escape'].includes(lk)) pause(false);
+    } else if (k === ' ' || lk === 'enter') {
+      if (G.state === 'title') newGame();
+      else if (G.state === 'brief') launch();
+      else if (G.state === 'end' && endGuard <= 0) newGame();
+    }
+  });
+  addEventListener('keyup', (e) => { keys[e.key.toLowerCase()] = false; });
+  addEventListener('blur', () => { for (const k in keys) keys[k] = false; pause(true); });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) pause(true); });
+
+  $('btn-start').addEventListener('click', () => { if (G.state === 'title') newGame(); });
+  $('btn-go').addEventListener('click', launch);
+  $('btn-resume').addEventListener('click', () => pause(false));
+  $('btn-again').addEventListener('click', () => { if (G.state === 'end' && endGuard <= 0) newGame(); });
+
+  // ---------- Update ----------
+  function update(dt) {
+    animT += dt;
+    if (!RM) for (const s of stars) { s.y += s.sp * dt; if (s.y > H) { s.y = 0; s.x = Math.random() * W; } }
+    if (endGuard > 0) endGuard -= dt;
+    if (shakeT > 0) shakeT -= dt;
+    if (tipT > 0) { tipT -= dt; if (tipT <= 0) hideTip(); }
+
+    for (const p of particles) { p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 300 * dt; p.life -= dt; }
+    particles = particles.filter(p => p.life > 0);
+    for (const f of floaters) { f.y -= 40 * dt; f.t -= dt; }
+    floaters = floaters.filter(f => f.t > 0);
+
+    for (const f of fleeing) f.t += dt;
+    fleeing = fleeing.filter(f => f.t < 1.2);
+
+    if (G.state === 'clear') {
+      clearT -= dt;
+      if (clearT <= 0) {
+        if (G.wave >= WAVES.length - 1) endGame(true);
+        else toBrief(G.wave + 1, G.clearMsg);
+      }
+      return;
+    }
+    if (G.state !== 'play') return;
+
+    // Player
+    const left = keys['arrowleft'] || keys['a'], right = keys['arrowright'] || keys['d'];
+    player.x += ((right ? 1 : 0) - (left ? 1 : 0)) * 380 * dt;
+    player.x = Math.max(16, Math.min(W - 16 - player.w, player.x));
+    if (player.inv > 0) player.inv -= dt;
+
+    // Player bullet
+    if (pBullet) {
+      pBullet.y -= 720 * dt;
+      if (pBullet.y < 30) pBullet = null;
+      else if (hitBunker(pBullet)) pBullet = null;
+      else for (const v of invaders) {
+        if (!v.alive) continue;
+        const x = ix(v), y = iy(v);
+        if (pBullet.x + pBullet.w > x && pBullet.x < x + IW && pBullet.y < y + IH && pBullet.y + pBullet.h > y) {
+          pBullet = null; hitInvader(v); break;
+        }
+      }
+    }
+    if (G.state !== 'play') return;
+
+    // Next row drops in after a short gap
+    if (spawnT > 0) { spawnT -= dt; if (spawnT <= 0) spawnRow(); }
+
+    // Formation
+    const alive = invaders.filter(v => v.alive);
+    const wv = WAVES[G.wave];
+    if (alive.length) {
+      const vx = wv.speed * (1 + rowNum * .15) * (1 + (1 - alive.length / form.total) * .8);
+      form.ox += form.dir * vx * dt;
+      let minX = Infinity, maxX = -Infinity;
+      for (const v of alive) { minX = Math.min(minX, ix(v)); maxX = Math.max(maxX, ix(v) + IW); }
+      if ((form.dir > 0 && maxX > W - 18) || (form.dir < 0 && minX < 18)) {
+        form.dir *= -1; form.oy += 22;
+        sfx(90, 70, .08, 'triangle', .05);
+      }
+      if (form.oy + IH + 9 >= BUNKER_Y) { endGame(false, 'The invaders landed'); return; }
+    }
+
+    // Enemy fire
+    fireT -= dt;
+    if (fireT <= 0 && alive.length) {
+      fireT = wv.fire * (.6 + Math.random() * .8);
+      const byCol = {};
+      for (const v of alive) byCol[v.col] = v;
+      const shooters = Object.values(byCol);
+      const s = shooters[Math.floor(Math.random() * shooters.length)];
+      eBullets.push({ x: ix(s) + 30 + Math.random() * (IW - 60), y: iy(s) + IH + 8, w: 4, h: 12, vy: 220 + G.wave * 18 });
+    }
+    for (const b of eBullets) {
+      b.y += b.vy * dt;
+      if (hitBunker(b)) { b.dead = true; continue; }
+      if (b.y > GROUND) { b.dead = true; continue; }
+      if (player.inv <= 0 && b.x + b.w > player.x + 4 && b.x < player.x + player.w - 4 && b.y + b.h > PLAYER_Y + 4 && b.y < PLAYER_Y + player.h) {
+        b.dead = true; loseLife(); if (G.state !== 'play') return;
+      }
+    }
+    eBullets = eBullets.filter(b => !b.dead);
+  }
+
+  // ---------- Render ----------
+  function drawInvader(v, x, y, color) {
+    const f = Math.floor(animT * 2.5) % 2;
+    ctx.fillStyle = color;
+    ctx.fillRect(x + 44, y - 9, 4, 9); ctx.fillRect(x + 38 - f * 2, y - 13, 12 + f * 4, 4);
+    ctx.fillRect(x + IW - 48, y - 9, 4, 9); ctx.fillRect(x + IW - 50 - f * 2, y - 13, 12 + f * 4, 4);
+    ctx.fillRect(x, y, IW, IH);
+    ctx.fillStyle = '#0d0a2a'; ctx.fillRect(x + 4, y + 4, IW - 8, IH - 8);
+    ctx.fillStyle = '#050414';
+    ctx.fillRect(x, y, 4, 4); ctx.fillRect(x + IW - 4, y, 4, 4); ctx.fillRect(x, y + IH - 4, 4, 4); ctx.fillRect(x + IW - 4, y + IH - 4, 4, 4);
+    ctx.fillStyle = color;
+    for (const l of [26, 72, IW - 78, IW - 32]) {
+      const o = f ? (l < IW / 2 ? -4 : 4) : 0;
+      ctx.fillRect(x + l, y + IH, 6, 5); ctx.fillRect(x + l + o, y + IH + 5, 6, 4);
+    }
+    ctx.fillStyle = '#ecebff'; ctx.font = LABEL_FONT; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    const n = v.lines.length;
+    v.lines.forEach((ln, i) => ctx.fillText(ln, x + IW / 2, y + IH / 2 + (i - (n - 1) / 2) * 18 + 1));
+  }
+
+  function drawCannon(x, y, s, color) {
+    ctx.fillStyle = color;
+    ctx.fillRect(x, y + 10 * s, 44 * s, 12 * s);
+    ctx.fillRect(x + 6 * s, y + 6 * s, 32 * s, 4 * s);
+    ctx.fillRect(x + 19 * s, y, 6 * s, 6 * s);
+  }
+
+  function render() {
+    ctx.save();
+    ctx.fillStyle = '#050414'; ctx.fillRect(0, 0, W, H);
+    if (shakeT > 0) ctx.translate((Math.random() - .5) * 10, (Math.random() - .5) * 10);
+
+    for (const s of stars) { ctx.globalAlpha = s.a; ctx.fillStyle = '#c9c6ff'; ctx.fillRect(s.x, s.y, s.s, s.s); }
+    ctx.globalAlpha = 1;
+
+    const inGame = form && ['play', 'paused', 'clear'].includes(G.state);
+
+    // HUD
+    ctx.textBaseline = 'middle';
+    ctx.font = PIX(14); ctx.textAlign = 'left'; ctx.fillStyle = '#8f8bd0'; ctx.fillText('SCORE', 20, 24);
+    ctx.fillStyle = '#ffcf4a'; ctx.fillText(String(G.score).padStart(6, '0'), 100, 24);
+    ctx.textAlign = 'center'; ctx.fillStyle = '#7df9ff'; ctx.font = PIX(11);
+    ctx.fillText(`WAVE ${G.wave + 1}/${WAVES.length} · SHOOT THE OUTCOMES`, W / 2, 24);
+    for (let i = 0; i < 3; i++) drawCannon(W - 40 - i * 32, 16, .55, i < G.lives ? '#7df9ff' : '#2a2470');
+
+    // Ground strip
+    ctx.fillStyle = '#2a2470'; ctx.fillRect(0, GROUND, W, 3);
+    if (inGame) {
+      ctx.font = PIX(10); ctx.fillStyle = '#8f8bd0';
+      ctx.textAlign = 'left';
+      ctx.fillText(`${WAVES[G.wave].name} · ROW ${Math.min(rowNum + 1, rowQueue.length)}/${rowQueue.length}`, 20, GROUND + 15);
+      ctx.textAlign = 'right'; ctx.fillText(`OUTCOMES LEFT ${outcomesLeft()}`, W - 20, GROUND + 15);
+      if (muted) { ctx.textAlign = 'center'; ctx.fillText('SOUND OFF', W / 2, GROUND + 15); }
+    }
+
+    if (inGame) {
+      // Bunkers
+      ctx.fillStyle = '#3fbf9a';
+      for (const bk of bunkers) for (const c of bk) if (c.alive) ctx.fillRect(c.x, c.y, 6, 6);
+
+      // Invaders
+      for (const v of invaders) if (v.alive) drawInvader(v, ix(v), iy(v), ROW_COLORS[rowNum % ROW_COLORS.length]);
+      for (const f of fleeing) {
+        ctx.globalAlpha = Math.max(0, 1 - f.t / 1.2);
+        drawInvader(f.v, f.x, f.y - f.t * f.t * 380, '#5a5690');
+        ctx.globalAlpha = 1;
+      }
+
+      // Bullets
+      ctx.fillStyle = '#ecebff';
+      if (pBullet) ctx.fillRect(pBullet.x, pBullet.y, pBullet.w, pBullet.h);
+      ctx.fillStyle = '#ff9a3d';
+      for (const b of eBullets) {
+        const z = Math.floor((b.y / 6)) % 2 ? 2 : -2;
+        ctx.fillRect(b.x + z, b.y, 4, 4); ctx.fillRect(b.x - z, b.y + 4, 4, 4); ctx.fillRect(b.x + z, b.y + 8, 4, 4);
+      }
+
+      // Player
+      const blink = player.inv > 0 && Math.floor(animT * 12) % 2 === 0;
+      if (!blink && G.lives > 0) drawCannon(player.x, PLAYER_Y, 1, '#7df9ff');
+    }
+
+    // Particles and floaters
+    for (const p of particles) { ctx.globalAlpha = Math.min(1, p.life * 2); ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 4, 4); }
+    ctx.globalAlpha = 1;
+    ctx.font = PIX(12); ctx.textAlign = 'center';
+    for (const f of floaters) { ctx.globalAlpha = Math.min(1, f.t * 2); ctx.fillStyle = f.color; ctx.fillText(f.text, f.x, f.y); }
+    ctx.globalAlpha = 1;
+
+    if (G.state === 'clear') {
+      ctx.font = PIX(28); ctx.fillStyle = '#5bffb0'; ctx.textAlign = 'center';
+      ctx.fillText('WAVE CLEAR', W / 2, H / 2 - 20);
+      ctx.font = PIX(11); ctx.fillStyle = '#ecebff';
+      ctx.fillText('THE OUTPUTS RETREAT', W / 2, H / 2 + 20);
+    }
+    ctx.restore();
+  }
+
+  let last = performance.now();
+  function loop(now) {
+    const dt = Math.min(.05, (now - last) / 1000); last = now;
+    update(dt); render();
+    requestAnimationFrame(loop);
+  }
+
+  // ---------- Boot ----------
+  async function start(data) {
+    try {
+      await Promise.race([
+        Promise.all([document.fonts.load(LABEL_FONT), document.fonts.load(PIX(14))]),
+        new Promise(r => setTimeout(r, 2500)),
+      ]);
+    } catch (e) {}
+    if (data && data.G && ['brief', 'play', 'paused', 'clear'].includes(data.G.state)) {
+      Object.assign(G, data.G);
+      toBrief(Math.min(G.wave, WAVES.length - 1), null);
+    } else {
+      show('ov-title');
+    }
+    try { window.claude?.hot?.snapshot?.(() => ({ G: { ...G, misses: G.misses.slice() } })); } catch (e) {}
+    requestAnimationFrame(loop);
+  }
+  window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+})();
+</script>
